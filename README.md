@@ -27,3 +27,7 @@ _**Uso**:_
   <td>Define o tempo total de resposta do host</td>
 </tr>
 </table>
+
+<br>
+
+![](https://i.imgur.com/r52ZXpS.png)
