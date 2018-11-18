@@ -13,19 +13,15 @@ _**Uso**:_
 </tr>
 <tr>
   <td rowspan="3">php port_scanner.php</td>
-  <td>-h</td>
+  <td>-h ou --host</td>
   <td>Define o host para se conectar</td>
 </tr>
 <tr>
-  <td>-p</td>
+  <td>-p ou --port</td>
   <td>Define a porta para se conectar</td>
 </tr>
 <tr>
-  <td>-t</td>
+  <td>-t ou --time</td>
   <td>Define o tempo total de resposta do host</td>
 </tr>
 </table>
-
-<br>
-
-![](https://i.imgur.com/r52ZXpS.png)
