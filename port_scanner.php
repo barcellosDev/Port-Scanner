@@ -53,14 +53,8 @@ abstract class PortScanner
           foreach ($comandos['PORTA'] as $k => $v)
           {
             $fsock = @fsockopen($comandos['IP'], $v, $errno, $errstr, $comandos['TEMPO']); // Código sucesso = 0, código failure = 10060
-            if (!$fsock)
-            {
-              $erros[$v] = $errno;
-            } else 
-            {
-              $erros[$v] = $errno;
-            }
-          }          
+            $erros[$v] = $errno;
+          }
           foreach ($erros as $i => $c)
           {
             if ($erros[$i] === 0)
