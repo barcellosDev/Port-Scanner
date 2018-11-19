@@ -46,13 +46,45 @@ abstract class PortScanner
       } else 
       {
         $comandos = self::verificaArgs();
-        $fsock = @fsockopen($comandos['IP'], $comandos['PORTA'], $errno, $errstr, $comandos['TEMPO']);
-        if (!$fsock) 
+
+        if (is_array($comandos['PORTA'])) 
         {
-          echo "Porta ".$comandos['PORTA']." não está aberta no host ".$comandos['IP']." ou há um firewall bloqueando-a! \n";
+          $erros = [];
+          foreach ($comandos['PORTA'] as $k => $v)
+          {
+            $fsock = @fsockopen($comandos['IP'], $v, $errno, $errstr, $comandos['TEMPO']); // Código sucesso = 0, código failure = 10060
+            if (!$fsock)
+            {
+              $erros[$v] = $errno;
+            } else 
+            {
+              $erros[$v] = $errno;
+            }
+          }          
+          foreach ($erros as $i => $c)
+          {
+            if ($erros[$i] === 0)
+            {
+              echo "
+              [+] A porta ".$i." está aberta!
+              ";
+            } else 
+            {
+              echo "
+              [-] A porta ".$i." está fechada ou há um firewall bloqueando-a!
+              ";
+            }
+          }
         } else 
         {
-          echo "Porta ".$comandos['PORTA']." aberta no host ".$comandos['IP']."\n";
+          $fsock = @fsockopen($comandos['IP'], $comandos['PORTA'], $errno, $errstr, $comandos['TEMPO']);
+          if (!$fsock) 
+          {
+            echo "Porta ".$comandos['PORTA']." não está aberta no host ".$comandos['IP']." ou há um firewall bloqueando-a! \n";
+          } else 
+          {
+            echo "Porta ".$comandos['PORTA']." aberta no host ".$comandos['IP']."\n";
+          }
         }
       }
     }
@@ -86,15 +118,33 @@ abstract class PortScanner
           {
             $porta_formatado = self::validaPorta($argv[$key+1]);
 
-            if ($porta_formatado) 
+            if (!is_array($porta_formatado)) 
             {
-              $porta = $argv[$key+1];
-            } elseif (is_int(self::$port))
-            {
-              $porta = self::$port;
+              if (is_bool($porta_formatado) and $porta_formatado == true) 
+              {
+                $porta = $argv[$key+1];
+              } else
+              {
+                if (is_int($porta_formatado)) 
+                {                  
+                  $porta = $porta_formatado;
+                } else 
+                {
+                  $porta = null;
+                }
+              }
             } else 
             {
-              $porta = null;
+              foreach ($porta_formatado as $k => $v) 
+              {
+                if (is_int($porta_formatado[$k]) and !empty($porta_formatado[$k])) 
+                {
+                  $porta = $porta_formatado;
+                } else 
+                {
+                  $porta = null;
+                }
+              }
             }
           }
         }
@@ -109,10 +159,24 @@ abstract class PortScanner
       $routes = ['ip' => $ip, 'porta' => $porta, 'tempo' => $time];
       foreach ($routes as $chave => $valor) 
       {
-        if (is_null($routes[$chave])) 
+        if (is_array($routes['porta'])) 
         {
-          echo 'O/A '.$chave.' informado(a) é inválido(a)!';
-          exit();
+          $ports = $routes['porta'];
+          foreach ($ports as $keyPort => $valuePort) 
+          {
+            if (is_null($ports[$keyPort]) or is_null($routes[$chave]))
+            {
+              echo 'O/A '.$chave.' informado(a) é inválido(a)!';
+              exit();
+            }
+          }
+        } else 
+        {
+          if (is_null($routes[$chave])) 
+          {
+            echo 'O/A '.$chave.' informado(a) é inválido(a)!';
+            exit();
+          }
         }
       }
       return [
@@ -182,26 +246,45 @@ abstract class PortScanner
       }
     }
 
-    private function validaPorta($porta)
+    private static function validaPorta($porta)
     {
       if (isset($porta)) 
       {
-        if (!is_numeric($porta)) 
-        {          
-          self::$port = getservbyname($porta, 'tcp');
-        } else 
+        $proibidos = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        if (strpos($porta, ',')) 
         {
-          if (strlen($porta) <= 5 and !in_array($porta, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+          $portas = explode(',', $porta);
+          foreach ($portas as $key => $value) 
           {
-            return true;
+            if (is_numeric($portas[$key])) 
+            {
+              if (strlen($portas[$key]) <= 5 and !in_array($portas[$key], $proibidos)) 
+              {
+                self::$port[] = (int)$portas[$key];
+              }
+            } else 
+            {
+              self::$port[] = getservbyname($portas[$key], 'tcp');
+            }
+          }
+          return self::$port;
+        } else
+        {
+          if (!is_numeric($porta))
+          {
+            self::$port = getservbyname($porta, 'tcp');
+            return self::$port;
           } else 
           {
-            return false;
+            if (strlen($porta) <= 5 and !in_array($porta, $proibidos))
+            {
+              return true;
+            } else 
+            {
+              return false;
+            }
           }
         }
-      } else 
-      {
-        return false;
       }
     }
 }

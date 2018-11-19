@@ -18,10 +18,20 @@ _**Uso**:_
 </tr>
 <tr>
   <td>-p ou --port</td>
-  <td>Define a porta para se conectar</td>
+  <td>Define a porta para se conectar. A porta pode ser tanto no formato numérico (80,443,25) quanto no formato de serviço (http,smtp,ftp), mas este último não funciona perfeitamente para todas as portas disponíveis.</td>
 </tr>
 <tr>
   <td>-t ou --time</td>
   <td>Define o tempo total de resposta do host</td>
 </tr>
 </table>
+
+<br>
+
+**Exemplo:**
+
+<ul>
+  <li>php port_scanner.php -h www.google.com -p 80 -t 1</li>
+  <li>php port_scanner.php -h www.google.com -p 80,443 -t 5</li>
+  <li>php port_scanner.php -h www.google.com -p http,443,smtp -t 3</li>
+</ul>
